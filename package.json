@@ -1,0 +1,33 @@
+{
+  "author": {
+    "name": "Maxim Donika",
+    "email": "donika.maxim@gmail.com",
+    "url": "https://github.com/mvxim"
+  },
+  "name": "express-mesto",
+  "description": "Продолжение «Места». Создание сервера на Express.js",
+  "version": "0.1.0",
+  "homepage": ".",
+  "private": true,
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "start": "node app.js",
+    "lint": "npx eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mvxim/express-mesto.git"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.9.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "express": "^4.17.2",
+    "mongoose": "^6.2.1"
+  }
+}
