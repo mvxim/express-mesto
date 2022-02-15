@@ -1,17 +1,15 @@
 const Card = require('../models/card');
+const { NOT_FOUND_ERROR, handleError } = require('../errors/errors');
 
 // GET, .../cards
 const getCards = async (req, res) => {
   try {
     const allCards = await Card.find({});
-    if (allCards.length > 0) {
+    if (allCards) {
       res.send(allCards);
-    } else {
-      res.status(404).send({ message: 'В базе нет ни одной карточки.' });
     }
-  } catch (e) {
-    res.status(500).send({ message: 'Ошибка на стороне сервера' });
-    console.log(`Ошибка получения всех пользователей: ${e}`);
+  } catch (error) {
+    handleError(error, res);
   }
 };
 
@@ -24,11 +22,10 @@ const createCard = async (req, res) => {
     if (card) {
       res.status(201).send(card);
     } else {
-      res.status(404).send({ message: 'Карточка не была создана.' });
+      res.status(NOT_FOUND_ERROR).send({ message: 'Карточка не была создана.' });
     }
-  } catch (e) {
-    res.status(500).send({ message: 'Ошибка на стороне сервера' });
-    console.log(`Ошибка создания карточки: ${e}`);
+  } catch (error) {
+    handleError(error, res);
   }
 };
 
@@ -43,11 +40,10 @@ const deleteCard = async (req, res) => {
         message: 'Пост удален',
       });
     } else {
-      res.status(404).send('Не удалось удалить карточку.');
+      res.status(NOT_FOUND_ERROR).send('Не удалось удалить карточку.');
     }
-  } catch (e) {
-    res.status(500).send({ message: 'Ошибка на стороне сервера' });
-    console.log(`Ошибка удаления карточки: ${e}`);
+  } catch (error) {
+    handleError(error, res);
   }
 };
 
@@ -63,14 +59,13 @@ const putCardLike = async (req, res) => {
     if (card) {
       res.send(card);
     } else {
-      res.status(404).send({
+      res.status(NOT_FOUND_ERROR).send({
         message:
             'Ошибка: эту карточку невозможно лайкнуть, потому что её не существует.',
       });
     }
-  } catch (e) {
-    res.status(500).send({ message: 'Ошибка на стороне сервера' });
-    console.log(`Ошибка установки лайка: ${e}`);
+  } catch (error) {
+    handleError(error, res);
   }
 };
 
@@ -86,14 +81,13 @@ const deleteCardLike = async (req, res) => {
     if (card) {
       res.send(card);
     } else {
-      res.status(404).send({
+      res.status(NOT_FOUND_ERROR).send({
         message:
             'Ошибка: эту карточку невозможно разлайкать, потому что её не существует.',
       });
     }
-  } catch (e) {
-    res.status(500).send({ message: 'Ошибка на стороне сервера' });
-    console.log(`Ошибка удаления лайка: ${e}`);
+  } catch (error) {
+    handleError(error, res);
   }
 };
 
