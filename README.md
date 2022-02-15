@@ -2,7 +2,8 @@
 
 ## Что за проект:
 
-Сервер на Express.js для проекта [https://github.com/mvxim/react-mesto-auth](https://github.com/mvxim/react-mesto-auth)
+Сервер на Express.js для
+проекта [https://github.com/mvxim/react-mesto-auth](https://github.com/mvxim/react-mesto-auth)
 
 ## Стек:
 
