@@ -23,11 +23,9 @@ const getUserById = async (req, res) => {
     if (user) {
       res.send(user)
     } else {
-      res
-        .status(404)
-        .send({
-          message: `Пользователь с id ${req.params.userId} не существует.`,
-        })
+      res.status(404).send({
+        message: `Пользователь с id ${req.params.userId} не существует.`,
+      })
     }
   } catch (e) {
     res.status(500).send({ message: "Ошибка на стороне сервера" })
@@ -76,7 +74,8 @@ const updateUser = async (req, res) => {
       res.status(400).send({ message: "Пользователь не был обновлен." })
     }
   } catch (e) {
-    console.log(`Ошибка создания пользователя: ${e}`)
+    res.status(500).send({ message: "Ошибка на стороне сервера" })
+    console.log(`Ошибка обновления пользователя: ${e}`)
   }
 }
 
@@ -101,7 +100,8 @@ const updateUserAvatar = async (req, res) => {
       res.status(400).send({ message: "Аватар не был обновлен." })
     }
   } catch (e) {
-    console.log(`Ошибка создания пользователя: ${e}`)
+    res.status(500).send({ message: "Ошибка на стороне сервера" })
+    console.log(`Ошибка обновления аватара пользователя: ${e}`)
   }
 }
 
