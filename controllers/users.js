@@ -7,11 +7,11 @@ const getUsers = async (req, res) => {
     if (allUsers.length > 0) {
       res.send(allUsers)
     } else {
-      res.status(404).send(`В базе нет ни одного пользователя.`)
+      res.status(404).send({ message: "В базе нет ни одного пользователя." })
     }
   } catch (e) {
     res.status(500).send({ message: "Ошибка на стороне сервера" })
-    console.log(`Ошибка получения всех пользователей: ${ e }`)
+    console.log(`Ошибка получения всех пользователей: ${e}`)
   }
 }
 
@@ -23,13 +23,17 @@ const getUserById = async (req, res) => {
     if (user) {
       res.send(user)
     } else {
-      res.status(404)
-          .send(`Пользователь с id ${ req.params.userId } не существует.`)
+      res
+        .status(404)
+        .send({
+          message: `Пользователь с id ${req.params.userId} не существует.`,
+        })
     }
   } catch (e) {
     res.status(500).send({ message: "Ошибка на стороне сервера" })
     console.log(
-        `Ошибка получения пользователя по id ${ req.params.userId }: ${ e }`)
+      `Ошибка получения пользователя по id ${req.params.userId}: ${e}`,
+    )
   }
 }
 
@@ -41,12 +45,11 @@ const createUser = async (req, res) => {
     if (user) {
       res.status(201).send(user)
     } else {
-      res.status(404)
-          .send(`Пользователь не был создан`)
+      res.status(400).send({ message: "Пользователь не был создан." })
     }
   } catch (e) {
     res.status(500).send({ message: "Ошибка на стороне сервера" })
-    console.log(`Ошибка создания пользователя: ${ e }`)
+    console.log(`Ошибка создания пользователя: ${e}`)
   }
 }
 
@@ -54,24 +57,26 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, about } = req.body
-    const updatedUser = await User.findOneAndUpdate(req.user._id, {
-          name,
-          about
-        },
-        {
-          "new": true,
-          "runValidators": true,
-          "upsert": true
-        })
+    const updatedUser = await User.findOneAndUpdate(
+      req.user._id,
+      {
+        name,
+        about,
+      },
+      {
+        new: true,
+        runValidators: true,
+        upsert: true,
+      },
+    )
     if (updatedUser) {
       console.log(updatedUser)
       res.send(updatedUser)
     } else {
-      console.log(updatedUser)
+      res.status(400).send({ message: "Пользователь не был обновлен." })
     }
-    
   } catch (e) {
-    console.log(`Ошибка создания пользователя: ${ e }`)
+    console.log(`Ошибка создания пользователя: ${e}`)
   }
 }
 
@@ -79,30 +84,31 @@ const updateUser = async (req, res) => {
 const updateUserAvatar = async (req, res) => {
   try {
     const { avatar } = req.body
-    const updatedUser = await User.findOneAndUpdate(req.user._id, {
-          avatar
-        },
-        {
-          "new": true,
-          "runValidators": true,
-          "upsert": true
-        })
+    const updatedUser = await User.findOneAndUpdate(
+      req.user._id,
+      {
+        avatar,
+      },
+      {
+        new: true,
+        runValidators: true,
+        upsert: true,
+      },
+    )
     if (updatedUser) {
       res.send(updatedUser)
     } else {
-      console.log(updatedUser)
+      res.status(400).send({ message: "Аватар не был обновлен." })
     }
-  
   } catch (e) {
-    console.log(`Ошибка создания пользователя: ${ e }`)
+    console.log(`Ошибка создания пользователя: ${e}`)
   }
 }
-
 
 module.exports = {
   getUsers,
   getUserById,
   createUser,
   updateUser,
-  updateUserAvatar
+  updateUserAvatar,
 }
