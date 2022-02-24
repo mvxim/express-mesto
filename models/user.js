@@ -35,16 +35,16 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// POST, .../sign-in. Если юзер есть в базе по почте, то считаем хеш его пароля и сравниваем с базой
+// POST, .../sign-in. Проверка, есть ли в базе такой пользователь, и верный ли его пароль
 userSchema.statics.findUserByCredentials = async function (email, password) {
   const user = await this.findOne({ email });
   if (!user) {
-    throw new Error('Неправильные почта или пароль');
+    throw new Error('Неправильные почта или пароль'); // 401 Unauthorized - неправильный емейл (не уточнять)
   }
   const isAuthenticated = await bcrypt.compare(password, user.password);
   if (!isAuthenticated) {
-    throw new Error('Статик метод модели: неправильные почта или пароль');
+    throw new Error('Статик метод модели: неправильные почта или пароль'); // 401 Unauthorized - неправильный пароль (не уточнять)
   }
-  return isAuthenticated;
+  return user;
 };
 module.exports = mongoose.model('user', userSchema);

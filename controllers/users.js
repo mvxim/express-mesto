@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { NOT_FOUND_ERROR, handleError } = require('../errors/errors');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
 const SALT_ROUNDS = 10;
 
 // POST, .../sign-in
@@ -11,16 +12,22 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      throw new Error('Неправильные почта или пароль');
+      throw new Error('Неправильные почта или пароль'); // 400 Bad Request - нет почты или пароля
     }
-    const user = await User.findUserByCredentials(email, password); // есть ли пользователь в базе?
+    const user = await User.findUserByCredentials(email, password);
     if (user) {
       const token = jwt.sign(
         { _id: user._id },
-        'some-secret-key',
+        NODE_ENV === 'production' ? JWT_SECRET : 'war_is_over_if_you_want_it',
         { expiresIn: '7d' },
       );
-      res.status(200).send({ message: 'Аутентифицированы!', token });
+      res
+        .cookie('token', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+          sameSite: true,
+        })
+        .status(200).send({ message: 'Аутентифицированы!' });
     }
   } catch (error) {
     handleError(error, res);

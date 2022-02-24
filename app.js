@@ -1,5 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 const router = require('./routes');
 
 const { PORT = 3000 } = process.env;
@@ -24,6 +26,7 @@ main();
 //   next();
 // });
 
+app.use(cookieParser());
 app.use(router);
 app.use((err, req, res) => {
   res.status(err.statusCode).send(err.message);
