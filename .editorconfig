@@ -25,6 +25,10 @@ charset = utf-8
 # Possible values - true, false
 trim_trailing_whitespace = true
 
+# Quotes style
+# Possible values - single, double
+quote_type = single
+
 [*.md]
 trim_trailing_whitespace = false
 

@@ -1,15 +1,8 @@
-const processHandler = require('process');
 const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes');
 
 const { PORT = 3000 } = process.env;
-
-processHandler.on('uncaughtException', (err, origin) => {
-  console.log(
-    `${origin} ${err.name} c текстом ${err.message} не была обработана. Обратите внимание!`,
-  );
-});
 
 const app = express();
 
@@ -24,11 +17,14 @@ const main = async () => {
 };
 main();
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '620bb5818f3d4dcf698dbaaf',
-  };
-  next();
-});
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: '620bb5818f3d4dcf698dbaaf',
+//   };
+//   next();
+// });
 
 app.use(router);
+app.use((err, req, res) => {
+  res.status(err.statusCode).send(err.message);
+});

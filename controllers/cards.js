@@ -34,7 +34,7 @@ const deleteCard = async (req, res) => {
   try {
     const { cardId } = req.params;
     const card = await Card.findByIdAndRemove(cardId);
-    console.log(card);
+
     if (card) {
       res.send({
         message: 'Пост удален',

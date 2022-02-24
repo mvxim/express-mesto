@@ -1,5 +1,31 @@
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
 const User = require('../models/user');
 const { NOT_FOUND_ERROR, handleError } = require('../errors/errors');
+
+const SALT_ROUNDS = 10;
+
+// POST, .../sign-in
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      throw new Error('Неправильные почта или пароль');
+    }
+    const user = await User.findUserByCredentials(email, password); // есть ли пользователь в базе?
+    if (user) {
+      const token = jwt.sign(
+        { _id: user._id },
+        'some-secret-key',
+        { expiresIn: '7d' },
+      );
+      res.status(200).send({ message: 'Аутентифицированы!', token });
+    }
+  } catch (error) {
+    handleError(error, res);
+  }
+};
 
 // GET, .../users
 const getUsers = async (req, res) => {
@@ -33,8 +59,15 @@ const getUserById = async (req, res) => {
 // POST, .../users
 const createUser = async (req, res) => {
   try {
-    const { name, about, avatar } = req.body;
-    const user = await User.create({ name, about, avatar });
+    const {
+      name, about, avatar, email, password,
+    } = req.body;
+
+    const hashedPass = await bcrypt.hash(password, SALT_ROUNDS);
+
+    const user = await User.create({
+      name, about, avatar, email, password: hashedPass,
+    });
     if (user) {
       res.status(201).send(user);
     }
@@ -81,7 +114,9 @@ const updateUserAvatar = async (req, res) => {
     if (updatedUser) {
       res.send(updatedUser);
     } else {
-      res.status(NOT_FOUND_ERROR).send({ message: 'Не получится обновить аватар у пользователя, которого нет.' });
+      res.status(NOT_FOUND_ERROR).send({
+        message: 'Не получится обновить аватар у пользователя, которого нет.',
+      });
     }
   } catch (error) {
     handleError(error, res);
@@ -89,6 +124,7 @@ const updateUserAvatar = async (req, res) => {
 };
 
 module.exports = {
+  login,
   getUsers,
   getUserById,
   createUser,
