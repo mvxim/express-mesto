@@ -2,19 +2,20 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-const { NOT_FOUND_ERROR, handleError } = require('../errors/errors');
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 const SALT_ROUNDS = 10;
 
 // POST, .../sign-in
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
       throw new Error('Неправильные почта или пароль'); // 400 Bad Request - нет почты или пароля
     }
-    const user = await User.findUserByCredentials(email, password);
+    const user = await User.findUserByCredentials(email, password); // { _id: ..., name: ..., ...}
     if (user) {
       const token = jwt.sign(
         { _id: user._id },
@@ -27,49 +28,65 @@ const login = async (req, res) => {
           httpOnly: true,
           sameSite: true,
         })
-        .status(200).send({ message: 'Аутентифицированы!' });
+        .status(200).send({ message: 'Аутентифицированы!', user });
     }
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
 // GET, .../users
-const getUsers = async (req, res) => {
+const getUsers = async (req, res, next) => {
   try {
     const allUsers = await User.find({});
     if (allUsers) {
       res.send(allUsers);
     }
   } catch (error) {
-    handleError(error, res);
+    next(error);
+  }
+};
+
+// GET, .../users/me
+
+const getMyUser = async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    const currentUser = await User.findById(_id);
+    if (!currentUser) {
+      throw new NotFoundError('Пользователя с вашим ID не существует!');
+    }
+    res.send(currentUser);
+  } catch (error) {
+    next(error);
   }
 };
 
 // GET, .../users/:userId
-const getUserById = async (req, res) => {
+const getUserById = async (req, res, next) => {
   try {
     const { userId } = req.params;
     const user = await User.findById(userId);
-    if (user) {
-      res.send(user);
-    } else {
-      res.status(NOT_FOUND_ERROR).send({
-        message: `Пользователь с id ${req.params.userId} не существует.`,
-      });
+    if (!user) {
+      throw new NotFoundError(`Пользователь с id ${userId} не существует.`);
+      // 404 NotFound — такой юзер не нашелся
     }
+    res.send(user);
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
 // POST, .../users
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
   try {
     const {
       name, about, avatar, email, password,
     } = req.body;
 
+    if (!password) {
+      throw new BadRequestError('Для регистрации нужен пароль.'); // 400 Bad Request - нет почты или пароля
+    }
     const hashedPass = await bcrypt.hash(password, SALT_ROUNDS);
 
     const user = await User.create({
@@ -79,12 +96,12 @@ const createUser = async (req, res) => {
       res.status(201).send(user);
     }
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
 // PATCH, .../users/me
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   try {
     const { name, about } = req.body;
     const updatedUser = await User.findOneAndUpdate(
@@ -102,12 +119,12 @@ const updateUser = async (req, res) => {
       res.send(updatedUser);
     }
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
 // PATCH, .../users/me/avatar
-const updateUserAvatar = async (req, res) => {
+const updateUserAvatar = async (req, res, next) => {
   try {
     const { avatar } = req.body;
     const updatedUser = await User.findOneAndUpdate(
@@ -120,19 +137,16 @@ const updateUserAvatar = async (req, res) => {
     );
     if (updatedUser) {
       res.send(updatedUser);
-    } else {
-      res.status(NOT_FOUND_ERROR).send({
-        message: 'Не получится обновить аватар у пользователя, которого нет.',
-      });
     }
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
 module.exports = {
   login,
   getUsers,
+  getMyUser,
   getUserById,
   createUser,
   updateUser,

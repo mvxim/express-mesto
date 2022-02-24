@@ -1,93 +1,93 @@
 const Card = require('../models/card');
-const { NOT_FOUND_ERROR, handleError } = require('../errors/errors');
+const ForbiddenError = require('../errors/ForbiddenError');
+const NotFoundError = require('../errors/NotFoundError');
 
 // GET, .../cards
-const getCards = async (req, res) => {
+const getCards = async (req, res, next) => {
   try {
-    const allCards = await Card.find({});
-    if (allCards) {
-      res.send(allCards);
+    const allCards = await Card.find({}).populate(['owner', 'likes']);
+    if (!allCards) {
+      throw new Error();
     }
+    res.send(allCards);
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
 // POST, .../cards
-const createCard = async (req, res) => {
+const createCard = async (req, res, next) => {
   try {
     const { name, link } = req.body;
-    const owner = req.user._id;
-    const card = await Card.create({ name, link, owner });
+    const ownerId = req.user._id;
+    const card = await Card.create({ name, link, owner: ownerId });
     if (card) {
       res.status(201).send(card);
-    } else {
-      res.status(NOT_FOUND_ERROR).send({ message: 'Карточка не была создана.' });
     }
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
 // DELETE, .../cards/:cardId
-const deleteCard = async (req, res) => {
+const deleteCard = async (req, res, next) => {
   try {
     const { cardId } = req.params;
-    const card = await Card.findByIdAndRemove(cardId);
-
-    if (card) {
-      res.send({
-        message: 'Пост удален',
-      });
-    } else {
-      res.status(NOT_FOUND_ERROR).send('Не удалось удалить карточку.');
+    const userId = req.user._id; // достать user._id и сравнить с id овнера карточки
+    const card = await Card.findById(cardId);
+    if (!card) {
+      throw new NotFoundError('Карточки с таким ID не существует.');
     }
+    const cardOwnerId = card.owner.valueOf();
+    if (cardOwnerId !== userId) {
+      throw new ForbiddenError('Нельзя удалить чужую карточку.');
+      // 403 Forbidden — авторизован, но изменяет чужой ресурс
+    }
+    const isRemoved = await Card.findByIdAndRemove(cardId);
+    if (!isRemoved) {
+      throw new NotFoundError('Передан неверный айди карточки, поэтому не получилось удалить.');
+    }
+    res.send({
+      message: 'Пост удален',
+    });
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
 // PUT, .../cards/:cardId/likes
-const putCardLike = async (req, res) => {
+const putCardLike = async (req, res, next) => {
   try {
     const { cardId } = req.params;
     const card = await Card.findByIdAndUpdate(
       cardId,
       { $addToSet: { likes: req.user._id } },
       { new: true },
-    );
-    if (card) {
-      res.send(card);
-    } else {
-      res.status(NOT_FOUND_ERROR).send({
-        message:
-            'Ошибка: эту карточку невозможно лайкнуть, потому что её не существует.',
-      });
+    ).populate(['owner', 'likes']);
+    if (!card) {
+      throw new NotFoundError('Передан неверный айди карточки, поэтому не получилось поставить лайк.');
     }
+    res.send(card);
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
 // DELETE, .../cards/:cardId/likes
-const deleteCardLike = async (req, res) => {
+const deleteCardLike = async (req, res, next) => {
   try {
     const { cardId } = req.params;
     const card = await Card.findByIdAndUpdate(
       cardId,
       { $pull: { likes: req.user._id } },
       { new: true },
-    );
-    if (card) {
-      res.send(card);
-    } else {
-      res.status(NOT_FOUND_ERROR).send({
-        message:
-            'Ошибка: эту карточку невозможно разлайкать, потому что её не существует.',
-      });
+    ).populate(['owner', 'likes']);
+    if (!card) {
+      throw new NotFoundError('Передан неверный айди карточки, поэтому не получилось убрать лайк.');
     }
+    res.send(card);
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
