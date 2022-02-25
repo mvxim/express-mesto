@@ -4,11 +4,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 const SALT_ROUNDS = 10;
 
-// POST, .../sign-in
+// POST, .../signin
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -28,7 +29,7 @@ const login = async (req, res, next) => {
           httpOnly: true,
           sameSite: true,
         })
-        .status(200).send({ message: 'Аутентифицированы!', user });
+        .status(200).send({ message: 'Авторизация успешна.' });
     }
   } catch (error) {
     next(error);
@@ -73,11 +74,14 @@ const getUserById = async (req, res, next) => {
     }
     res.send(user);
   } catch (error) {
+    if (error.name === 'CastError') {
+      res.status(400).send({ message: 'Передан некорректный ID пользователя.' });
+    }
     next(error);
   }
 };
 
-// POST, .../users
+// POST, .../signup
 const createUser = async (req, res, next) => {
   try {
     const {
@@ -93,9 +97,15 @@ const createUser = async (req, res, next) => {
       name, about, avatar, email, password: hashedPass,
     });
     if (user) {
-      res.status(201).send(user);
+      res.status(201).send({ message: 'Регистрация успешна!' });
     }
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      next(new BadRequestError('Некорректные данные создания пользователя.'));
+    }
+    if (error.code === 11000) {
+      next(new ConflictError('Пользователь с таким имейлом уже зарегистрирован.'));
+    }
     next(error);
   }
 };
@@ -119,6 +129,9 @@ const updateUser = async (req, res, next) => {
       res.send(updatedUser);
     }
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      next(new BadRequestError('Некорректные данные обновления информации пользователя.'));
+    }
     next(error);
   }
 };
@@ -139,6 +152,9 @@ const updateUserAvatar = async (req, res, next) => {
       res.send(updatedUser);
     }
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      next(new BadRequestError('Некорректная ссылка.'));
+    }
     next(error);
   }
 };

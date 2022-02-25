@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
-const BadRequestError = require('../errors/BadRequestError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -49,11 +49,11 @@ const userSchema = new mongoose.Schema({
 userSchema.statics.findUserByCredentials = async function (email, password) {
   const user = await this.findOne({ email }).select('+password');
   if (!user) {
-    throw new BadRequestError('Неправильные почта или пароль'); // 401 Unauthorized - неправильный емейл (не уточнять)
+    throw new UnauthorizedError('Неправильные почта или пароль'); // 401 Unauthorized - неправильный емейл (не уточнять)
   }
   const isAuthenticated = await bcrypt.compare(password, user.password);
   if (!isAuthenticated) {
-    throw new BadRequestError('Неправильные почта или пароль'); // 401 Unauthorized - неправильный пароль (не уточнять)
+    throw new UnauthorizedError('Неправильные почта или пароль'); // 401 Unauthorized - неправильный пароль (не уточнять)
   }
   return user;
 };

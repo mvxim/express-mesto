@@ -1,5 +1,6 @@
 const Card = require('../models/card');
 const ForbiddenError = require('../errors/ForbiddenError');
+const BadRequestError = require('../errors/BadRequestError');
 const NotFoundError = require('../errors/NotFoundError');
 
 // GET, .../cards
@@ -25,6 +26,9 @@ const createCard = async (req, res, next) => {
       res.status(201).send(card);
     }
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      next(new BadRequestError('Некорректные данные при создании карточки'));
+    }
     next(error);
   }
 };
@@ -51,6 +55,9 @@ const deleteCard = async (req, res, next) => {
       message: 'Пост удален',
     });
   } catch (error) {
+    if (error.name === 'CastError') {
+      res.status(400).send({ message: 'Передан некорректный ID пользователя.' });
+    }
     next(error);
   }
 };
@@ -69,6 +76,9 @@ const putCardLike = async (req, res, next) => {
     }
     res.send(card);
   } catch (error) {
+    if (error.name === 'CastError') {
+      res.status(400).send({ message: 'Передан некорректный ID пользователя.' });
+    }
     next(error);
   }
 };
@@ -87,6 +97,9 @@ const deleteCardLike = async (req, res, next) => {
     }
     res.send(card);
   } catch (error) {
+    if (error.name === 'CastError') {
+      res.status(400).send({ message: 'Передан некорректный ID пользователя.' });
+    }
     next(error);
   }
 };

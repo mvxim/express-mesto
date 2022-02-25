@@ -1,5 +1,6 @@
 const express = require('express');
-const { celebrate, Joi } = require('celebrate');
+const { celebrate } = require('celebrate');
+const { joiUserIdScheme, joiUserInfoScheme, joiUserAvatarScheme } = require('../utils/validation');
 
 const usersRouter = express.Router();
 const {
@@ -10,23 +11,10 @@ const {
   updateUserAvatar,
 } = require('../controllers/users');
 
-const joiUserIdSchema = {
-  params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24),
-  }),
-};
-
-const joiUserInfoSchema = {
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-  }),
-};
-
 usersRouter.get('/', getUsers);
 usersRouter.get('/me', getMyUser);
-usersRouter.get('/:userId', celebrate(joiUserIdSchema), getUserById);
-usersRouter.patch('/me', express.json(), celebrate(joiUserInfoSchema), updateUser);
-usersRouter.patch('/me/avatar', express.json(), updateUserAvatar);
+usersRouter.get('/:userId', celebrate(joiUserIdScheme), getUserById);
+usersRouter.patch('/me', express.json(), celebrate(joiUserInfoScheme), updateUser);
+usersRouter.patch('/me/avatar', express.json(), celebrate(joiUserAvatarScheme), updateUserAvatar);
 
 module.exports = usersRouter;
