@@ -75,9 +75,10 @@ const getUserById = async (req, res, next) => {
     res.send(user);
   } catch (error) {
     if (error.name === 'CastError') {
-      res.status(400).send({ message: 'Передан некорректный ID пользователя.' });
+      next(new BadRequestError('Передан некорректный ID пользователя.'));
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
@@ -102,11 +103,11 @@ const createUser = async (req, res, next) => {
   } catch (error) {
     if (error.name === 'ValidationError') {
       next(new BadRequestError('Некорректные данные создания пользователя.'));
-    }
-    if (error.code === 11000) {
+    } else if (error.code === 11000) {
       next(new ConflictError('Пользователь с таким имейлом уже зарегистрирован.'));
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
@@ -131,8 +132,9 @@ const updateUser = async (req, res, next) => {
   } catch (error) {
     if (error.name === 'ValidationError') {
       next(new BadRequestError('Некорректные данные обновления информации пользователя.'));
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
@@ -154,8 +156,9 @@ const updateUserAvatar = async (req, res, next) => {
   } catch (error) {
     if (error.name === 'ValidationError') {
       next(new BadRequestError('Некорректная ссылка.'));
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 

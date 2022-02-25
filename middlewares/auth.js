@@ -17,7 +17,11 @@ module.exports = (req, res, next) => {
         throw new UnauthorizedError('С токеном авторизации что-то не так: не удалось проверить его подлинность.');
       }
     } catch (error) {
-      throw new UnauthorizedError('С токеном авторизации что-то не так: не удалось проверить его подлинность.');
+      if (error.name === 'JsonWebTokenError') {
+        next(new UnauthorizedError('С токеном авторизации что-то не так: не удалось проверить его подлинность.'));
+      } else {
+        next(error);
+      }
     }
     req.user = payload; // { _id: 'string', iat: created, exp: expires }
     next();

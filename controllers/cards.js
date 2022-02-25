@@ -28,8 +28,9 @@ const createCard = async (req, res, next) => {
   } catch (error) {
     if (error.name === 'ValidationError') {
       next(new BadRequestError('Некорректные данные при создании карточки'));
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
@@ -56,9 +57,10 @@ const deleteCard = async (req, res, next) => {
     });
   } catch (error) {
     if (error.name === 'CastError') {
-      res.status(400).send({ message: 'Передан некорректный ID пользователя.' });
+      next(new BadRequestError('Передан некорректный ID карточки.'));
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
@@ -77,9 +79,10 @@ const putCardLike = async (req, res, next) => {
     res.send(card);
   } catch (error) {
     if (error.name === 'CastError') {
-      res.status(400).send({ message: 'Передан некорректный ID пользователя.' });
+      next(new BadRequestError('Передан некорректный ID карточки.'));
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
@@ -98,9 +101,10 @@ const deleteCardLike = async (req, res, next) => {
     res.send(card);
   } catch (error) {
     if (error.name === 'CastError') {
-      res.status(400).send({ message: 'Передан некорректный ID пользователя.' });
+      next(new BadRequestError('Передан некорректный ID карточки.'));
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
