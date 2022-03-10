@@ -5,6 +5,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 const SALT_ROUNDS = 10;
@@ -162,6 +163,19 @@ const updateUserAvatar = async (req, res, next) => {
   }
 };
 
+const logout = async (req, res, next) => {
+  try {
+    const { token } = req.cookies;
+    if (!token) {
+      throw new UnauthorizedError('Нужно авторизоваться, чтобы взаимодействовать с защищенным роутом.');
+      // 401 Unauthorized - запрос от неаутентифицированного пользователя
+    }
+    res.clearCookie('token').send({ message: 'Разлогинено!' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   login,
   getUsers,
@@ -170,4 +184,5 @@ module.exports = {
   createUser,
   updateUser,
   updateUserAvatar,
+  logout,
 };

@@ -6,6 +6,7 @@ const { errors } = require('celebrate');
 const router = require('./routes');
 const { handleError } = require('./middlewares/handleError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const cors = require('./middlewares/cors');
 
 const { PORT = 3000 } = process.env;
 
@@ -17,9 +18,11 @@ const main = async () => {
     useUnifiedTopology: true,
   });
   await app.listen(PORT);
+  console.log(`Running at ${PORT}`);
 };
 main();
 
+app.use(cors);
 app.use(requestLogger);
 app.use(cookieParser());
 app.use(router);
