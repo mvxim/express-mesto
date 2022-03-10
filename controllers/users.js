@@ -24,6 +24,7 @@ const login = async (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : 'war_is_over_if_you_want_it',
         { expiresIn: '7d' },
       );
+
       res
         .cookie('token', token, {
           maxAge: 3600000 * 24 * 7,
