@@ -7,7 +7,7 @@ module.exports = (req, res, next) => {
   try {
     const { token } = req.cookies;
     if (!token) {
-      throw new UnauthorizedError('Нужно авторизоваться, чтобы взаимодействовать с защищенным роутом.');
+      throw new UnauthorizedError('Авторизация не удалась. Нужно авторизоваться, чтобы взаимодействовать с защищенным роутом.');
     // 401 Unauthorized - запрос от неаутентифицированного пользователя
     }
     let payload;
