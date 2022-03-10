@@ -15,7 +15,7 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      throw new Error('Неправильные почта или пароль'); // 400 Bad Request - нет почты или пароля
+      throw new BadRequestError('Неправильные почта или пароль'); // 400 Bad Request - нет почты или пароля
     }
     const user = await User.findUserByCredentials(email, password); // { _id: ..., name: ..., ...}
     if (user) {
@@ -29,6 +29,7 @@ const login = async (req, res, next) => {
         .cookie('token', token, {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
+          sameSite: 'none',
         })
         .status(200).send({ message: 'Авторизация успешна.' });
     }
