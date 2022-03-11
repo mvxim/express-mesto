@@ -30,6 +30,7 @@ const login = async (req, res, next) => {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
           sameSite: 'none',
+          secure: true,
         })
         .status(200).send({ message: 'Авторизация успешна.' });
     }
