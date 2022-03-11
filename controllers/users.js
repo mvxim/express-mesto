@@ -28,7 +28,7 @@ const login = async (req, res, next) => {
       res
         .cookie('token', token, {
           maxAge: 3600000 * 24 * 7,
-          domain: 'mvxim.nomoredomains.work',
+          domain: '.mvxim.nomoredomains.work',
           httpOnly: true,
         })
         .status(200).send({ message: 'Авторизация успешна.' });
