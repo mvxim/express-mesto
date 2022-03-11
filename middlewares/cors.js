@@ -1,8 +1,8 @@
 const allowedCors = [
-  'https://mvxim.nomoreparties.work',
-  'http://mvxim.nomoreparties.work',
-  'http://mvxim.nomoreparties.work/',
-  'https://mvxim.nomoreparties.work/',
+  'https://mvxim.nomoredomains.work',
+  'http://mvxim.nomoredomains.work',
+  'http://mvxim.nomoredomains.work/',
+  'https://mvxim.nomoredomains.work/',
   'http://localhost:3001',
   'https://localhost:3001',
   'http://localhost:3001/',
